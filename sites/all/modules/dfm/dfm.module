@@ -49,10 +49,10 @@ function dfm_shows(){
  */
 function dfm_media(){
   $vars = array();
-  $vars['videos'] = views_get_view_result('videos');
+  $vars['videos'] = views_get_view_result('videos', 'page');
   $vars['video_images'] = array();
   $vars['images'] = views_get_view_result('images', 'block_1');
-  $vars['downloads'] = views_get_view_result('downloads');
+  $vars['downloads'] = views_get_view_result('downloads', 'page');
 
   // Make sure the correct include file is loaded
   module_load_include('inc', 'media_youtube', '/includes/media_youtube.formatters.inc');
@@ -75,7 +75,10 @@ function dfm_media(){
  * Page callback: playlist
  */
 function dfm_playlist(){
-  $tracks = views_get_view_result('tracks');
+  $tracks = views_get_view_result('tracks', 'page_1');
+  print '<pre>';
+  print_r($tracks);
+  print '</pre>';
   $xml = '<?xml version="1.0" encoding="utf-8"?>';
   $xml .= '<playlist>';
   foreach($tracks as $track){
