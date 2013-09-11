@@ -76,9 +76,6 @@ function dfm_media(){
  */
 function dfm_playlist(){
   $tracks = views_get_view_result('tracks', 'page_1');
-  print '<pre>';
-  print_r($tracks);
-  print '</pre>';
   $xml = '<?xml version="1.0" encoding="utf-8"?>';
   $xml .= '<playlist>';
   foreach($tracks as $track){
