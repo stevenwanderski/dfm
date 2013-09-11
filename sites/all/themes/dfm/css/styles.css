@@ -129,7 +129,7 @@ h2 {
   padding: 5px 0 20px 0;
 }
 
-.inner, #main, .content {
+.inner, #main, #user-login {
   width: 940px;
   margin: 0 auto;
   position: relative;
