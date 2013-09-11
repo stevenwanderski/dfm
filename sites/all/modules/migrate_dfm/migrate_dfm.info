@@ -1,0 +1,15 @@
+name = "Migrate DFM"
+description = "Imports DMF Django site into a shiny new Drupal 7 install"
+package = "Migration"
+core = 7.x
+dependencies[] = migrate
+dependencies[] = migrate_ui
+
+files[] = migrate_dfm.migrate.inc
+files[] = dfm.inc
+files[] = dfm_venue.inc
+files[] = dfm_show.inc
+
+; Information added by drupal.org packaging script on 2013-06-19
+version = "7.x-dev"
+core = "7.x"

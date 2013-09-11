@@ -1,0 +1,106 @@
+<?php
+/**
+ * @file
+ * The main file of the 'controller' module.
+ */
+
+// New menu items.
+define('CONTROLLER_MENU_DEFAULT_KEY', 'default');
+// Other constants used by the controller module.
+define('CONTROLLER_MENU_SEPARATOR', '::');
+define('CONTROLLER_DEFAULT_ACTION', 'indexAction');
+define('CONTROLLER_MENU_HANDLER', 'controller_menu_handler');
+define('CONTROLLER_DIR_NAME', 'controllers');
+define('CONTROLLER_WATCHDOG_ID', 'controller');
+define('CONTROLLER_CHANGE_SETTINGS_PERM', 'change controller settings');
+
+/**
+ * Implements hook_controller_api().
+ */
+function controller_controller_api() {
+  return '2.x';
+}
+
+/**
+ * Implements hook_permission().
+ */
+function controller_permission() {
+  return array(
+    CONTROLLER_CHANGE_SETTINGS_PERM => array(
+      'title' => t('Change settings for controllers'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function controller_menu_alter(&$items) {
+  $items = array_merge($items, controller_get_menu_items(NULL, TRUE));
+}
+
+/**
+ * Returns list of modules that define menu items in their controllers.
+ */
+function controller_get_module_list() {
+  return module_implements('controller_api');
+}
+
+/**
+ * Returns list of menu items that defined by the controllers
+ * for the one module or for the list of modules.
+ *
+ * @param string|array $module_list
+ *   It can be either array of module names or string, containing
+ *   module name.
+ *
+ * @return array
+ *   An array
+ */
+function controller_get_menu_items($module_list = NULL) {
+  if (NULL === $module_list) {
+    $module_list = controller_get_module_list();
+  }
+  $module_list = (array) $module_list;
+  $collector = new ControllerMenuItemsCollector();
+  $menu_items = array();
+  foreach ($module_list as $module_name) {
+    $menu_items = array_merge(
+      $menu_items,
+      $collector->getMenuItemsForModule($module_name)
+    );
+  }
+  return $menu_items;
+}
+
+/**
+ * Menu callback. Handles paths for all controllers.
+ * Creates an instance of a controller and calls an action.
+ */
+function controller_menu_handler() {
+  $args = func_get_args();
+  $callback_meta = array_shift($args);
+  $pos = strpos($callback_meta, CONTROLLER_MENU_SEPARATOR);
+  // Process only valid defined actions.
+  if (FALSE !== $pos) {
+    list($class_name, $method_name, $module_name) = explode(CONTROLLER_MENU_SEPARATOR, $callback_meta, 3);
+    if (class_exists($class_name)) {
+      $controller = new $class_name();
+      if (method_exists($controller, 'setModuleName')) {
+        $controller->setModuleName($module_name);
+      }
+      $response = call_user_func_array(array($controller, $method_name), $args);
+      return $response;
+    }
+  }
+  return MENU_NOT_FOUND;
+}
+
+/**
+ * This function resets all static caches that the 'controller'
+ * module can use. It can be useful in tests.
+ */
+function controller_clear_caches() {
+  drupal_static_reset('controller_get_menu_items');
+  ControllerMenuItemsCollector::resetCache();
+}

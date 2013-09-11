@@ -1,0 +1,35 @@
+<?php
+require_once dirname(__FILE__) . '/TestCase.php';
+
+class ControllerPhpDocParserTest extends ControllerTestCase {
+  /**
+   * Return info for the test system.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => __CLASS__,
+      'group' => 'MVC',
+    );
+  }
+
+  function setUp() {
+    parent::setUp();
+    $this->parser = new ControllerMethodDocParser();
+    // Require file so that PHP can resolve constants defined in it.
+    require_once dirname(__FILE__) . '/_files/MyBarController.php';
+    $this->parser->setClassName('ControllerMyBarController');
+  }
+
+  function testExpandsSelfConstants() {
+    $doc = '/**
+             * @path => self::SOME_CONST_PATH
+             * @access arguments => array("foo bar"),
+             */';
+    $actual = $this->parser->parse($doc);
+    $expected = array(
+      'path' => 'my/path/example',
+      'access arguments' => array('foo bar'),
+    );
+    $this->assertEqual($expected, $actual);
+  }
+}

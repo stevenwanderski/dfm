@@ -1,0 +1,24 @@
+<?php
+// module file my_module.module
+define( 'CLASSES_DIR', 'classes' ); // define class folder name
+
+require_once( CLASSES_DIR . '/homepage.class.php' ); // includes our class file
+
+// check if Prometheus is actually exist before initialize
+class_exists('Prometheus') && Prometheus::register(
+  array(
+    'DEFAULTS' => array(
+      'template' => array(
+        'load_as_region' => 'content'  // only load content to content area
+      ),
+    ),
+    'Homepage' => array(
+      'paths' => array(
+        'hello' => array(
+          'prefix' => ''
+        ),
+      ),
+    ),
+  )
+);
+?>

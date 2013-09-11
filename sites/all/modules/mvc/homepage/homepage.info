@@ -1,0 +1,5 @@
+name = Homepage
+description = "My Custom Module that uses Prometheus"
+dependencies[] = prometheus
+package = Custom
+core = "7.x"

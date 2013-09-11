@@ -1,0 +1,78 @@
+<?php
+require_once dirname(__FILE__) . '/TestCase.php';
+
+/**
+ * Test for the ControllerClassMetaDataService class.
+ */
+class ControllerMenuItemsCollectorTest extends ControllerTestCase {
+  /**
+   * Return info for the test system.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => __CLASS__,
+      'group' => 'MVC',
+    );
+  }
+
+  /**
+   * Initialization.
+   */
+  function setUp() {
+    parent::setUp();
+    controller_clear_caches();
+    $options = array(
+      'addDefaultMenuItemNormalizers' => FALSE,
+    );
+    $this->collector = new ControllerMenuItemsCollector($options);
+    $this->collector->addMenuItemNormalizer(new ControllerStubMenuItemNormalizer());
+  }
+
+  /**
+   * Clearing.
+   */
+  function tearDown() {
+    parent::tearDown();
+    controller_clear_caches();
+  }
+
+  /**
+   * Test method.
+   */
+  function testGetMenuItemsForModuleDir() {
+    $expected_menu_items = array(
+      'foo' => array(
+        'title' => 'My title 1',
+        'module' => 'controller',
+        'controller' => 'ControllerMyFooController',
+        'action' => 'myAction',
+        'file path' => drupal_get_path('module', 'controller'),
+        'file' => 'tests/_files/MyFooController.php',
+      ),
+      'my/path/example' => array(
+        'module' => 'controller',
+        'controller' => 'ControllerMyFooController',
+        'action' => 'myActionWithConstPath',
+        'title' => 'My title 2',
+        'file path' => drupal_get_path('module', 'controller'),
+        'file' => 'tests/_files/MyFooController.php',
+        'type' => MENU_CALLBACK,
+      ),
+      'bar/baz' => array(
+        'module' => 'controller',
+        'controller' => 'ControllerMyFooController',
+        'action' => 'myOtherAction',
+        'title' => 'My page title',
+        'page arguments' => array('foo' => 'bar'),
+        'type' => MENU_NORMAL_ITEM,
+        'default' => array('test' => 'My default page'),
+        'file path' => drupal_get_path('module', 'controller'),
+        'file' => 'tests/_files/MyFooController.php',
+      ),
+    );
+    $actual_menu_items = $this->collector->getMenuItemsForModuleDir('controller', 'tests/_files');
+#d($expected_menu_items, $actual_menu_items);
+    $this->assertEqual($expected_menu_items, $actual_menu_items);
+  }
+}
+

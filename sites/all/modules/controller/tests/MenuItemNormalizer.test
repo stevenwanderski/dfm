@@ -1,0 +1,56 @@
+<?php
+require_once dirname(__FILE__) . '/TestCase.php';
+
+/**
+ * Test for the ControllerMenuItemNormalizer class.
+ */
+class ControllerMenuItemNormalizerTest extends ControllerTestCase {
+  /**
+   * Return info for the test system.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => __CLASS__,
+      'group' => 'MVC',
+    );
+  }
+
+  /**
+   * Initialization.
+   */
+  function setUp() {
+    parent::setUp();
+    controller_clear_caches();
+    $this->normalizer = new ControllerMenuItemNormalizer();
+  }
+
+  /**
+   * Clearing.
+   */
+  function tearDown() {
+    parent::tearDown();
+    controller_clear_caches();
+  }
+
+  function testNormalizeTitle() {
+    $item_definition = array(
+      'title' => 'Foo',
+      'module' => 'test',
+      'controller' => 'ControllerMyFooController',
+      'action' => 'indexAction',
+    );
+    $path = 'some/path';
+    $expected = array(
+      $path => array(
+        'title' => 'Foo',
+        'module' => 'controller',
+        'type' => MENU_CALLBACK,
+        'weight' => 0,
+        'page callback' => 'controller_menu_handler',
+        'page arguments' => array('ControllerMyFooController::indexAction::test'),
+      ),
+    );
+    $this->assertEqual($expected, $this->normalizer->normalize($path, $item_definition));
+  }
+}
+

@@ -1,0 +1,84 @@
+<?php
+require_once dirname(__FILE__) . '/TestCase.php';
+
+/**
+ * Test for the ControllerDefaultMenuItemNormalizer class.
+ */
+class ControllerDefaultMenuItemNormalizerTest extends ControllerTestCase {
+  /**
+   * Return info for the test system.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => __CLASS__,
+      'group' => 'MVC',
+    );
+  }
+
+  /**
+   * Initialization.
+   */
+  function setUp() {
+    parent::setUp();
+    controller_clear_caches();
+    $this->normalizer = new ControllerDefaultMenuItemNormalizer();
+  }
+
+  /**
+   * Clearing.
+   */
+  function tearDown() {
+    parent::tearDown();
+    controller_clear_caches();
+  }
+
+  /**
+   * Test method.
+   */
+  function testNormalizeWithDefaultItem() {
+    $path = 'bar/baz';
+    $file_path = '/some/file/path';
+    $item_definition = array(
+      'controller' => 'ControllerMyFooController',
+      'action' => 'myOtherAction',
+      'title' => 'My page title',
+      'page arguments' => array('foo' => 'bar'),
+      'module' => 'controller',
+      'default' => array('test' => 'My default page'),
+      'file' => $file_path,
+    );
+    $meta_arg = 'ControllerMyFooController'
+      . CONTROLLER_MENU_SEPARATOR
+      . 'myOtherAction'
+      . CONTROLLER_MENU_SEPARATOR
+      . 'controller';
+    $expected = array(
+      $path => array(
+        'page callback' => 'controller_menu_handler',
+        'page arguments' => array(
+          0 => $meta_arg,
+          'foo' => 'bar',
+        ),
+        'title' => 'My page title',
+        'type' => MENU_NORMAL_ITEM,
+        'module' => 'controller',
+        'weight' => 0,
+        'file' => $file_path,
+      ),
+      $path . '/test' => array(
+        'title' => 'My default page',
+        'weight' => 0,
+        'module' => 'controller',
+        'file' => $file_path,
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+      ),
+    );
+    $actual = $this->normalizer->normalize($path, $item_definition);
+    $this->assertEqual($expected, $actual);
+
+    $item_definition['type'] = MENU_CALLBACK;
+    $actual = $this->normalizer->normalize($path, $item_definition);
+    $expected[$path]['type'] = MENU_CALLBACK;
+    $this->assertEqual($expected, $actual);
+  }
+}

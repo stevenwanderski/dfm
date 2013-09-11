@@ -1,0 +1,4 @@
+name = DFM
+description = DFM menu overrides
+package = DFM
+core = "7.x"

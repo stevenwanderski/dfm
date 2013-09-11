@@ -1,0 +1,108 @@
+<?php
+
+/**
+ * Implements hook_menu.
+ */
+function dfm_menu(){
+  $items['home'] = array(
+    'page callback' => 'dfm_home',
+    'access arguments' => array('access content')
+  );
+  $items['shows'] = array(
+    'page callback' => 'dfm_shows',
+    'access arguments' => array('access content')
+  );
+  $items['media'] = array(
+    'page callback' => 'dfm_media',
+    'access arguments' => array('access content')
+  );
+  $items['playlist'] = array(
+    'page callback' => 'dfm_playlist',
+    'access arguments' => array('access content')
+  );
+  return $items;
+}
+
+/**
+ * Page callback: home
+ */
+function dfm_home(){
+  $vars = array();
+  $vars['shows'] = views_get_view_result('shows');
+  $vars['news'] = views_get_view_result('news');
+  $homepage = node_load(6);
+  $vars['homepage'] = node_view($homepage);
+  return theme('dfm_home', $vars);
+}
+
+/**
+ * Page callback: shows
+ */
+function dfm_shows(){
+  $vars = array();
+  $vars['shows'] = views_get_view_result('shows');
+  return theme('dfm_shows', $vars);
+}
+
+/**
+ * Page callback: shows
+ */
+function dfm_media(){
+  $vars = array();
+  $vars['videos'] = views_get_view_result('videos');
+  $vars['video_images'] = array();
+  $vars['images'] = views_get_view_result('images', 'block_1');
+  $vars['downloads'] = views_get_view_result('downloads');
+
+  // Make sure the correct include file is loaded
+  module_load_include('inc', 'media_youtube', '/includes/media_youtube.formatters.inc');
+
+  foreach ($vars['videos'] as $video) {
+    // Load the file
+    $file = file_load($video->field_field_video[0]['raw']['fid']);
+    // Set up the settings array with your image style
+    $display['settings'] = array('image_style' => 'video_thumb');
+    // Get the render array for the thumbnail image
+    $image_render_array = media_youtube_file_formatter_image_view($file, $display, LANGUAGE_NONE);
+    // Render it
+    $vars['video_images'][$video->nid] = render($image_render_array);
+  }
+
+  return theme('dfm_media', $vars);
+}
+
+/**
+ * Page callback: playlist
+ */
+function dfm_playlist(){
+  $tracks = views_get_view_result('tracks');
+  $xml = '<?xml version="1.0" encoding="utf-8"?>';
+  $xml .= '<playlist>';
+  foreach($tracks as $track){
+    $xml .= '<item>';
+    $xml .= '<title>' . $track->node_title . '</title>';
+    $xml .= '<path>' . file_create_url($track->field_field_file[0]['raw']['uri']) . '</path>';
+    $xml .= '</item>';
+  }
+  $xml .= '</playlist>';
+  print $xml;
+}
+
+/**
+ * Implements hook_theme.
+ */
+function dfm_theme() {
+  return array(
+    'dfm_home' => array(
+      'template' => 'templates/home',
+    ),
+    'dfm_shows' => array(
+      'template' => 'templates/shows',
+    ),
+    'dfm_media' => array(
+      'template' => 'templates/media',
+    )
+  );
+}
+
+?>
